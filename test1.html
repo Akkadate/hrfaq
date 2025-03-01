@@ -1,0 +1,15 @@
+const API_URL = "https://ecpbvoijdtgkaabuglmw.supabase.co";
+const API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjcGJ2b2lqZHRna2FhYnVnbG13Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA4MzkzMDEsImV4cCI6MjA1NjQxNTMwMX0.391_WbnnNWxAB55h5Br4gfFu4c3m65o9x-XPIx4R-WA";
+
+async function getProducts() {
+  const response = await fetch(API_URL, {
+    headers: {
+      "apikey": API_KEY,
+      "Authorization": `Bearer ${API_KEY}`
+    }
+  });
+  const data = await response.json();
+  console.log(data); // แสดงข้อมูลใน console
+}
+
+getProducts();
