@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบคำถามที่พบบ่อย - ระบบบริหารงานบุคคล</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f3f4f6;
+            min-height: 100vh;
+        }
+        
+        .container {
+            display: flex;
+            min-height: 100vh;
+            flex-direction: column;
+        }
+        
+        @media (min-width: 768px) {
+            .container {
+                flex-direction: row;
+            }
+        }
+        
+        .sidebar {
+            background-color: #1f2937;
+            color: white;
+            padding: 1rem;
+            width: 100%;
+        }
+        
+        @media (min-width: 768px) {
+            .sidebar {
+                width: 25%;
+            }
+        }
+        
+        .sidebar h2 {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #4b5563;
+        }
+        
+        .category-list {
+            list-style-type: none;
+        }
+        
+        .category-item {
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .category-item:hover {
+            background-color: #4b5563;
+        }
+        
+        .category-item.active {
+            background-color: #2563eb;
+        }
+        
+        .content {
+            padding: 1.5rem;
+            width: 100%;
+        }
+        
+        @media (min-width: 768px) {
+            .content {
+                width: 75%;
+            }
+        }
+        
+        .content h2 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+        }
+        
+        .intro-card {
+            background-color: white;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .intro-card h2 {
+            margin-bottom: 1rem;
+        }
+        
+        .intro-card p {
+            margin-bottom: 0.75rem;
+        }
+        
+        .intro-info {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background-color: #ebf5ff;
+            border-radius: 0.5rem;
+        }
+        
+        .intro-info h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .intro-info ul {
+            list-style-type: disc;
+            padding-left: 1.25rem;
+        }
+        
+        .intro-info li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .questions-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .question-card {
+            background-color: white;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .question-header {
+            padding: 1rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.2s;
+        }
+        
+        .question-header:hover {
+            background-color: #f9fafb;
+        }
+        
+        .question-title {
+            font-size: 1.125rem;
+            font-weight: 500;
+        }
+        
+        .question-icon {
+            color: #6b7280;
+        }
+        
+        .question-answer {
+            padding: 1rem;
+            background-color: #f9fafb;
+            border-top: 1px solid #e5e7eb;
+            display: none;
+        }
+        
+        .question-answer.active {
+            display: block;
+        }
+        
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        
+        .error {
+            color: #ef4444;
+            padding: 1rem;
+        }
+        
+        .empty-message {
+            color: #6b7280;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h2>หมวดหมู่คำถาม</h2>
+            <ul id="categoryList" class="category-list">
+                <li class="category-item active" data-group="all">ทั้งหมด</li>
+                <!-- Groups will be added here dynamically -->
+            </ul>
+        </div>
+        
+        <div class="content">
+            <div id="loadingIndicator" class="loading">กำลังโหลดข้อมูล...</div>
+            <div id="errorIndicator" class="error" style="display: none;"></div>
+            <div id="contentArea" style="display: none;">
+                <div id="introContent" class="intro-card">
+                    <h2>ระบบบริหารงานบุคคล - คำถามที่พบบ่อย</h2>
+                    <p>ยินดีต้อนรับสู่ระบบคำถามที่พบบ่อยของระบบบริหารงานบุคคล เว็บไซต์นี้ได้รวบรวมคำถามและคำตอบที่พบบ่อยเกี่ยวกับการใช้งานระบบ</p>
+                    <p>กรุณาเลือกหมวดหมู่ทางด้านซ้ายเพื่อดูคำถามที่เกี่ยวข้อง</p>
+                    <div class="intro-info">
+                        <h3>การใช้งานเว็บไซต์</h3>
+                        <ul>
+                            <li>คลิกที่หมวดหมู่ในเมนูด้านซ้ายเพื่อดูคำถามในหมวดนั้น</li>
+                            <li>คลิกที่คำถามเพื่อดูคำตอบโดยละเอียด</li>
+                            <li>คำตอบสามารถแสดงรูปภาพ ลิงก์ และรายละเอียดอื่นๆ ได้</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div id="questionsContent" style="display: none;">
+                    <h2 id="questionsTitle">คำถามทั้งหมด</h2>
+                    <div id="questionsContainer" class="questions-container">
+                        <!-- Questions will be added here dynamically -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Supabase configuration
+        const supabaseUrl = 'https://ecpbvoijdtgkaabuglmw.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjcGJ2b2lqZHRna2FhYnVnbG13Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA4MzkzMDEsImV4cCI6MjA1NjQxNTMwMX0.391_WbnnNWxAB55h5Br4gfFu4c3m65o9x-XPIx4R-WA';
+
+        // DOM Elements
+        const categoryList = document.getElementById('categoryList');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const errorIndicator = document.getElementById('errorIndicator');
+        const contentArea = document.getElementById('contentArea');
+        const introContent = document.getElementById('introContent');
+        const questionsContent = document.getElementById('questionsContent');
+        const questionsTitle = document.getElementById('questionsTitle');
+        const questionsContainer = document.getElementById('questionsContainer');
+
+        // State variables
+        let questions = [];
+        let groups = [];
+        let selectedGroup = 'all';
+        let expandedQuestionId = null;
+
+        // Function to fetch data from Supabase using REST API
+        async function fetchFromSupabase(endpoint, options = {}) {
+            const url = `${supabaseUrl}/rest/v1/${endpoint}`;
+            const headers = {
+                'apikey': supabaseKey,
+                'Authorization': `Bearer ${supabaseKey}`,
+                'Content-Type': 'application/json',
+                'Prefer': 'return=representation',
+                ...options.headers
+            };
+
+            try {
+                const response = await fetch(url, {
+                    ...options,
+                    headers
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Supabase API error: ${response.status}`);
+                }
+
+                return await response.json();
+            } catch (error) {
+                console.error('Error fetching from Supabase:', error);
+                throw error;
+            }
+        }
+
+        // Initialize the application
+        async function initApp() {
+            try {
+                // Fetch data from Supabase
+                const data = await fetchFromSupabase('faq', {
+                    method: 'GET',
+                    headers: {
+                        'Range': '0-999',
+                        'Prefer': 'count=exact',
+                    }
+                });
+
+                questions = data || [];
+                
+                // Extract unique groups
+                const uniqueGroupsSet = new Set(questions.map(item => item.group));
+                groups = Array.from(uniqueGroupsSet);
+                
+                // Hide loading indicator and show content
+                loadingIndicator.style.display = 'none';
+                contentArea.style.display = 'block';
+                
+                // Populate the category list
+                populateCategoryList();
+                
+                // Show the introduction initially
+                showIntroduction();
+                
+            } catch (err) {
+                console.error('Error fetching data:', err);
+                loadingIndicator.style.display = 'none';
+                errorIndicator.textContent = 'Failed to load data. Please try again later.';
+                errorIndicator.style.display = 'block';
+            }
+        }
+
+        // Populate the category list with unique groups
+        function populateCategoryList() {
+            groups.forEach(group => {
+                const li = document.createElement('li');
+                li.className = 'category-item';
+                li.textContent = group;
+                li.dataset.group = group;
+                li.addEventListener('click', () => selectGroup(group));
+                categoryList.appendChild(li);
+            });
+        }
+
+        // Handle group selection
+        function selectGroup(group) {
+            // Update selected group
+            selectedGroup = group;
+            expandedQuestionId = null;
+            
+            // Update active class in category list
+            document.querySelectorAll('.category-item').forEach(item => {
+                if ((item.dataset.group === 'all' && group === 'all') || 
+                    (item.dataset.group === group)) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+            
+            // Show questions for the selected group
+            if (group === 'all') {
+                showAllQuestions();
+            } else {
+                showGroupQuestions(group);
+            }
+        }
+
+        // Show introduction content
+        function showIntroduction() {
+            introContent.style.display = 'block';
+            questionsContent.style.display = 'none';
+        }
+
+        // Show all questions
+        function showAllQuestions() {
+            introContent.style.display = 'none';
+            questionsContent.style.display = 'block';
+            questionsTitle.textContent = 'คำถามทั้งหมด';
+            
+            renderQuestions(questions);
+        }
+
+        // Show questions for a specific group
+        function showGroupQuestions(group) {
+            introContent.style.display = 'none';
+            questionsContent.style.display = 'block';
+            questionsTitle.textContent = `คำถามเกี่ยวกับ: ${group}`;
+            
+            const filteredQuestions = questions.filter(q => q.group === group);
+            renderQuestions(filteredQuestions);
+        }
+
+        // Render questions to the container
+        function renderQuestions(questionsToRender) {
+            // Clear existing questions
+            questionsContainer.innerHTML = '';
+            
+            if (questionsToRender.length === 0) {
+                const emptyMessage = document.createElement('p');
+                emptyMessage.className = 'empty-message';
+                emptyMessage.textContent = 'ไม่พบข้อมูลคำถามในหมวดหมู่นี้';
+                questionsContainer.appendChild(emptyMessage);
+                return;
+            }
+            
+            // Add each question
+            questionsToRender.forEach(question => {
+                const questionCard = document.createElement('div');
+                questionCard.className = 'question-card';
+                questionCard.id = `question-${question.id}`;
+                
+                const questionHeader = document.createElement('div');
+                questionHeader.className = 'question-header';
+                questionHeader.addEventListener('click', () => toggleQuestion(question.id));
+                
+                const questionTitle = document.createElement('h3');
+                questionTitle.className = 'question-title';
+                questionTitle.textContent = question.question;
+                
+                const questionIcon = document.createElement('span');
+                questionIcon.className = 'question-icon';
+                questionIcon.textContent = '▼';
+                
+                questionHeader.appendChild(questionTitle);
+                questionHeader.appendChild(questionIcon);
+                
+                const questionAnswer = document.createElement('div');
+                questionAnswer.className = 'question-answer';
+                questionAnswer.innerHTML = question.answer;
+                
+                questionCard.appendChild(questionHeader);
+                questionCard.appendChild(questionAnswer);
+                
+                questionsContainer.appendChild(questionCard);
+            });
+        }
+
+        // Toggle question expansion
+        function toggleQuestion(id) {
+            const questionCard = document.getElementById(`question-${id}`);
+            const questionAnswer = questionCard.querySelector('.question-answer');
+            const questionIcon = questionCard.querySelector('.question-icon');
+            
+            if (expandedQuestionId === id) {
+                // Collapse the current question
+                questionAnswer.classList.remove('active');
+                questionIcon.textContent = '▼';
+                expandedQuestionId = null;
+            } else {
+                // Collapse any currently expanded question
+                if (expandedQuestionId !== null) {
+                    const currentExpandedCard = document.getElementById(`question-${expandedQuestionId}`);
+                    if (currentExpandedCard) {
+                        currentExpandedCard.querySelector('.question-answer').classList.remove('active');
+                        currentExpandedCard.querySelector('.question-icon').textContent = '▼';
+                    }
+                }
+                
+                // Expand the clicked question
+                questionAnswer.classList.add('active');
+                questionIcon.textContent = '▲';
+                expandedQuestionId = id;
+            }
+        }
+
+        // Add event listener for the "All" category
+        document.querySelector('.category-item[data-group="all"]').addEventListener('click', () => selectGroup('all'));
+
+        // Initialize the application when the page loads
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
