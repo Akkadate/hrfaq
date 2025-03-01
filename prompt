@@ -1,0 +1,16 @@
+###Prompt1
+A
+ต้องการ สร้างเว็บไซต์รวบรวมคำถามและคำตอบ แบบ  Q&A หรือ FAQ ของระบบบริหารงานบุคคล
+1. หน้าจอแบ่งเป็น 2 คอลัมม์ , คอลัมม์ซ้ายเป็หมวดหมู่ของคำถาม คอลัมม์นขวาเป็นรายการคำถามรวบรวมไว้ , หน้าแรก (ยังไม่ได้คลิกเลือกหมวดหมู่ ให้แสดงข้อมูลทั่วไปของระบบ
+2. คอลัมม์ขวาที่แสดงรายการคำถาม ให้แสดงเพราะคำถาม จะแสดงคำตอบก็ต่อเมื่อคลิกที่คำถามนั้น คำตอบจึงจะแสดง สามารถแสดงผลเมื่อแทรก code HTML ได้
+3. ฐานข้อมูลที่ใช้จาก supabase มี 5 คอลัมม์คือ ID,create_at, question, answer,group ซึ่ง question เป็นข้อมูคำถาม answer เป็นข้อมูลคำตอบ และ group เป็นกลุ่มของคำถาม
+4. ข้อมูล project API มีดังนี้
+4.1 Project URL คือ "xxxx"
+4.2 API Key คือ "xxxxxx-xxx-xxx"
+4.3 Javascript 
+"""
+import { createClient } from '@supabase/supabase-js'
+const supabaseUrl = 'xxxxxxxxx'
+const supabaseKey = process.env.SUPABASE_KEY
+const supabase = createClient(supabaseUrl, supabaseKey)
+"""
