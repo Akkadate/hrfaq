@@ -1,1 +1,506 @@
-ddddd
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบจัดการข้อมูล FAQ - ระบบบริหารงานบุคคล</title>
+    <!-- เพิ่ม Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- ไอคอน -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- CSS -->
+    <link rel="stylesheet" href="admin-styles.css">
+</head>
+<body>
+    <div class="header">
+        <div class="header-logo">
+            <i class="fas fa-cog"></i>
+        </div>
+        <div class="header-title">ระบบจัดการข้อมูล FAQ - ระบบบริหารงานบุคคล</div>
+        <div class="header-actions">
+            <a href="index.html" class="btn btn-secondary">
+                <i class="fas fa-home"></i> กลับสู่หน้าหลัก
+            </a>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="sidebar">
+            <h2><i class="fas fa-th-list"></i> เมนูจัดการ</h2>
+            <ul id="adminMenu" class="admin-menu">
+                <li class="menu-item active" data-section="dashboard">
+                    <i class="fas fa-tachometer-alt"></i> แดชบอร์ด
+                </li>
+                <li class="menu-item" data-section="list">
+                    <i class="fas fa-list"></i> รายการคำถาม
+                </li>
+                <li class="menu-item" data-section="add">
+                    <i class="fas fa-plus-circle"></i> เพิ่มคำถามใหม่
+                </li>
+                <li class="menu-item" data-section="categories">
+                    <i class="fas fa-tags"></i> จัดการหมวดหมู่
+                </li>
+                <li class="menu-item" data-section="export">
+                    <i class="fas fa-file-export"></i> นำเข้า/ส่งออกข้อมูล
+                </li>
+            </ul>
+        </div>
+        
+        <div class="content">
+            <div id="loadingIndicator" class="loading">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">กำลังโหลดข้อมูล...</div>
+            </div>
+            
+            <div id="errorIndicator" class="error" style="display: none;">
+                <i class="fas fa-exclamation-circle"></i>
+                <span id="errorText">เกิดข้อผิดพลาดในการโหลดข้อมูล</span>
+            </div>
+            
+            <div id="contentArea" style="display: none;">
+                <!-- แดชบอร์ด -->
+                <div id="dashboardSection" class="content-section">
+                    <h2><i class="fas fa-tachometer-alt"></i> แดชบอร์ด</h2>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-question-circle"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-value" id="totalQuestions">0</div>
+                                <div class="stat-label">คำถามทั้งหมด</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-folder"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-value" id="totalCategories">0</div>
+                                <div class="stat-label">หมวดหมู่ทั้งหมด</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-calendar-alt"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-value" id="recentQuestions">0</div>
+                                <div class="stat-label">คำถามล่าสุด (30 วัน)</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-edit"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-value" id="pendingReview">0</div>
+                                <div class="stat-label">รอการตรวจสอบ</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="dashboard-row">
+                        <div class="dashboard-card">
+                            <h3><i class="fas fa-chart-pie"></i> สัดส่วนคำถามตามหมวดหมู่</h3>
+                            <div class="category-stats" id="categoryStats">
+                                <!-- จะถูกเพิ่มโดย JavaScript -->
+                            </div>
+                        </div>
+                        
+                        <div class="dashboard-card">
+                            <h3><i class="fas fa-clock"></i> คำถามล่าสุด</h3>
+                            <div class="recent-questions" id="recentQuestionsList">
+                                <!-- จะถูกเพิ่มโดย JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- รายการคำถาม -->
+                <div id="listSection" class="content-section" style="display: none;">
+                    <h2><i class="fas fa-list"></i> รายการคำถาม</h2>
+                    
+                    <div class="list-controls">
+                        <div class="search-box">
+                            <input type="text" id="searchQuestions" placeholder="ค้นหาคำถาม..." />
+                            <button id="searchQuestionsBtn"><i class="fas fa-search"></i></button>
+                        </div>
+                        
+                        <div class="filter-controls">
+                            <select id="categoryFilter">
+                                <option value="all">ทุกหมวดหมู่</option>
+                                <!-- หมวดหมู่จะถูกเพิ่มโดย JavaScript -->
+                            </select>
+                            
+                            <select id="sortQuestions">
+                                <option value="newest">ล่าสุด</option>
+                                <option value="oldest">เก่าสุด</option>
+                                <option value="alphabetical">ตัวอักษร (ก-ฮ)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="questions-table-container">
+                        <table class="questions-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 5%">ID</th>
+                                    <th style="width: 30%">คำถาม</th>
+                                    <th style="width: 15%">หมวดหมู่</th>
+                                    <th style="width: 15%">วันที่สร้าง</th>
+                                    <th style="width: 15%">วันที่แก้ไข</th>
+                                    <th style="width: 20%">การจัดการ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="questionsTableBody">
+                                <!-- จะถูกเพิ่มโดย JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="pagination" id="questionsPagination">
+                        <!-- จะถูกเพิ่มโดย JavaScript -->
+                    </div>
+                </div>
+                
+                <!-- เพิ่มคำถามใหม่ -->
+                <div id="addSection" class="content-section" style="display: none;">
+                    <h2><i class="fas fa-plus-circle"></i> เพิ่มคำถามใหม่</h2>
+                    
+                    <form id="addQuestionForm" class="question-form">
+                        <div class="form-group">
+                            <label for="questionTitle">คำถาม:</label>
+                            <input type="text" id="questionTitle" placeholder="ระบุคำถาม" required />
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="questionAnswer">คำตอบ:</label>
+                            <div class="editor-toolbar">
+                                <button type="button" data-action="bold"><i class="fas fa-bold"></i></button>
+                                <button type="button" data-action="italic"><i class="fas fa-italic"></i></button>
+                                <button type="button" data-action="list"><i class="fas fa-list-ul"></i></button>
+                                <button type="button" data-action="link"><i class="fas fa-link"></i></button>
+                                <button type="button" data-action="image"><i class="fas fa-image"></i></button>
+                            </div>
+                            <textarea id="questionAnswer" rows="10" placeholder="ระบุคำตอบ" required></textarea>
+                            <div class="editor-preview" id="answerPreview">
+                                <!-- แสดงตัวอย่างคำตอบ -->
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="questionCategory">หมวดหมู่:</label>
+                            <select id="questionCategory" required>
+                                <!-- หมวดหมู่จะถูกเพิ่มโดย JavaScript -->
+                            </select>
+                            <button type="button" class="btn-link" id="newCategoryBtn">
+                                <i class="fas fa-plus-circle"></i> เพิ่มหมวดหมู่ใหม่
+                            </button>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>คุณสมบัติเพิ่มเติม:</label>
+                            <div class="checkbox-group">
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="isHighlighted" />
+                                    <label for="isHighlighted">แสดงเด่นชัด</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="isPinned" />
+                                    <label for="isPinned">ปักหมุด</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="needsReview" />
+                                    <label for="needsReview">ต้องการการตรวจสอบ</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" id="cancelAddBtn">ยกเลิก</button>
+                            <button type="submit" class="btn btn-primary" id="saveQuestionBtn">บันทึกคำถาม</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- แก้ไขคำถาม -->
+                <div id="editSection" class="content-section" style="display: none;">
+                    <h2><i class="fas fa-edit"></i> แก้ไขคำถาม</h2>
+                    
+                    <form id="editQuestionForm" class="question-form">
+                        <input type="hidden" id="editQuestionId" />
+                        
+                        <div class="form-group">
+                            <label for="editQuestionTitle">คำถาม:</label>
+                            <input type="text" id="editQuestionTitle" placeholder="ระบุคำถาม" required />
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="editQuestionAnswer">คำตอบ:</label>
+                            <div class="editor-toolbar">
+                                <button type="button" data-action="bold"><i class="fas fa-bold"></i></button>
+                                <button type="button" data-action="italic"><i class="fas fa-italic"></i></button>
+                                <button type="button" data-action="list"><i class="fas fa-list-ul"></i></button>
+                                <button type="button" data-action="link"><i class="fas fa-link"></i></button>
+                                <button type="button" data-action="image"><i class="fas fa-image"></i></button>
+                            </div>
+                            <textarea id="editQuestionAnswer" rows="10" placeholder="ระบุคำตอบ" required></textarea>
+                            <div class="editor-preview" id="editAnswerPreview">
+                                <!-- แสดงตัวอย่างคำตอบที่แก้ไข -->
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="editQuestionCategory">หมวดหมู่:</label>
+                            <select id="editQuestionCategory" required>
+                                <!-- หมวดหมู่จะถูกเพิ่มโดย JavaScript -->
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>คุณสมบัติเพิ่มเติม:</label>
+                            <div class="checkbox-group">
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="editIsHighlighted" />
+                                    <label for="editIsHighlighted">แสดงเด่นชัด</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="editIsPinned" />
+                                    <label for="editIsPinned">ปักหมุด</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="editNeedsReview" />
+                                    <label for="editNeedsReview">ต้องการการตรวจสอบ</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" id="cancelEditBtn">ยกเลิก</button>
+                            <button type="submit" class="btn btn-primary" id="updateQuestionBtn">บันทึกการแก้ไข</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- จัดการหมวดหมู่ -->
+                <div id="categoriesSection" class="content-section" style="display: none;">
+                    <h2><i class="fas fa-tags"></i> จัดการหมวดหมู่</h2>
+                    
+                    <div class="categories-management">
+                        <div class="categories-list-container">
+                            <h3>หมวดหมู่ทั้งหมด</h3>
+                            <div class="categories-list" id="categoriesList">
+                                <!-- จะถูกเพิ่มโดย JavaScript -->
+                            </div>
+                        </div>
+                        
+                        <div class="category-form-container">
+                            <h3 id="categoryFormTitle">เพิ่มหมวดหมู่ใหม่</h3>
+                            <form id="categoryForm" class="category-form">
+                                <input type="hidden" id="categoryId" />
+                                
+                                <div class="form-group">
+                                    <label for="categoryName">ชื่อหมวดหมู่:</label>
+                                    <input type="text" id="categoryName" placeholder="ระบุชื่อหมวดหมู่" required />
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="categoryIcon">ไอคอน:</label>
+                                    <div class="icon-selector">
+                                        <div class="selected-icon" id="selectedIcon">
+                                            <i class="fas fa-folder"></i>
+                                        </div>
+                                        <div class="icon-options" id="iconOptions">
+                                            <div class="icon-option" data-icon="fas fa-folder"><i class="fas fa-folder"></i></div>
+                                            <div class="icon-option" data-icon="fas fa-calendar-alt"><i class="fas fa-calendar-alt"></i></div>
+                                            <div class="icon-option" data-icon="fas fa-money-bill-wave"><i class="fas fa-money-bill-wave"></i></div>
+                                            <div class="icon-option" data-icon="fas fa-user-edit"><i class="fas fa-user-edit"></i></div>
+                                            <div class="icon-option" data-icon="fas fa-shield-alt"><i class="fas fa-shield-alt"></i></div>
+                                            <div class="icon-option" data-icon="fas fa-cogs"><i class="fas fa-cogs"></i></div>
+                                            <div class="icon-option" data-icon="fas fa-building"><i class="fas fa-building"></i></div>
+                                            <div class="icon-option" data-icon="fas fa-graduation-cap"><i class="fas fa-graduation-cap"></i></div>
+                                            <div class="icon-option" data-icon="fas fa-users"><i class="fas fa-users"></i></div>
+                                            <div class="icon-option" data-icon="fas fa-file-alt"><i class="fas fa-file-alt"></i></div>
+                                        </div>
+                                        <input type="hidden" id="categoryIcon" value="fas fa-folder" required />
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="categoryDescription">คำอธิบาย:</label>
+                                    <textarea id="categoryDescription" rows="3" placeholder="อธิบายเกี่ยวกับหมวดหมู่นี้"></textarea>
+                                </div>
+                                
+                                <div class="form-actions">
+                                    <button type="button" class="btn btn-secondary" id="resetCategoryBtn">ยกเลิก</button>
+                                    <button type="submit" class="btn btn-primary" id="saveCategoryBtn">บันทึกหมวดหมู่</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- นำเข้า/ส่งออกข้อมูล -->
+                <div id="exportSection" class="content-section" style="display: none;">
+                    <h2><i class="fas fa-file-export"></i> นำเข้า/ส่งออกข้อมูล</h2>
+                    
+                    <div class="export-import-container">
+                        <div class="export-card">
+                            <h3><i class="fas fa-file-export"></i> ส่งออกข้อมูล</h3>
+                            <p>ส่งออกข้อมูลคำถามทั้งหมดในรูปแบบ JSON หรือ CSV เพื่อสำรองข้อมูลหรือนำไปใช้ในระบบอื่น</p>
+                            
+                            <div class="export-options">
+                                <div class="export-option">
+                                    <input type="radio" id="exportJson" name="exportFormat" value="json" checked />
+                                    <label for="exportJson">JSON</label>
+                                </div>
+                                <div class="export-option">
+                                    <input type="radio" id="exportCsv" name="exportFormat" value="csv" />
+                                    <label for="exportCsv">CSV</label>
+                                </div>
+                            </div>
+                            
+                            <div class="export-actions">
+                                <button class="btn btn-primary" id="exportDataBtn">
+                                    <i class="fas fa-download"></i> ส่งออกข้อมูล
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="import-card">
+                            <h3><i class="fas fa-file-import"></i> นำเข้าข้อมูล</h3>
+                            <p>นำเข้าข้อมูลคำถามจากไฟล์ JSON หรือ CSV ที่ส่งออกจากระบบนี้</p>
+                            
+                            <div class="import-file">
+                                <label for="importFile" class="file-upload-label">
+                                    <i class="fas fa-cloud-upload-alt"></i> เลือกไฟล์
+                                    <input type="file" id="importFile" accept=".json,.csv" />
+                                </label>
+                                <span id="selectedFileName">ยังไม่ได้เลือกไฟล์</span>
+                            </div>
+                            
+                            <div class="import-options">
+                                <div class="import-option">
+                                    <input type="checkbox" id="importReplace" />
+                                    <label for="importReplace">แทนที่ข้อมูลเดิมทั้งหมด</label>
+                                </div>
+                                <div class="import-option">
+                                    <input type="checkbox" id="importPreview" checked />
+                                    <label for="importPreview">แสดงตัวอย่างก่อนนำเข้า</label>
+                                </div>
+                            </div>
+                            
+                            <div class="import-actions">
+                                <button class="btn btn-primary" id="importDataBtn" disabled>
+                                    <i class="fas fa-upload"></i> นำเข้าข้อมูล
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="import-preview" id="importPreviewContainer" style="display: none;">
+                        <h3>ตัวอย่างข้อมูลที่จะนำเข้า</h3>
+                        <div class="import-preview-content" id="importPreviewContent">
+                            <!-- จะถูกเพิ่มโดย JavaScript -->
+                        </div>
+                        
+                        <div class="import-preview-actions">
+                            <button class="btn btn-secondary" id="cancelImportBtn">ยกเลิก</button>
+                            <button class="btn btn-primary" id="confirmImportBtn">ยืนยันการนำเข้า</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal สำหรับลบคำถาม -->
+    <div class="modal" id="deleteModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-trash-alt"></i> ยืนยันการลบคำถาม</h3>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>คุณแน่ใจหรือไม่ที่ต้องการลบคำถามนี้? การกระทำนี้ไม่สามารถยกเลิกได้</p>
+                <div class="question-preview" id="deleteQuestionPreview">
+                    <!-- จะถูกเพิ่มโดย JavaScript -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelDeleteBtn">ยกเลิก</button>
+                <button class="btn btn-danger" id="confirmDeleteBtn">ยืนยันการลบ</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal สำหรับเพิ่มหมวดหมู่ใหม่ -->
+    <div class="modal" id="newCategoryModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-plus-circle"></i> เพิ่มหมวดหมู่ใหม่</h3>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="quickCategoryForm" class="category-form">
+                    <div class="form-group">
+                        <label for="quickCategoryName">ชื่อหมวดหมู่:</label>
+                        <input type="text" id="quickCategoryName" placeholder="ระบุชื่อหมวดหมู่" required />
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="quickCategoryIcon">ไอคอน:</label>
+                        <div class="icon-selector">
+                            <div class="selected-icon" id="quickSelectedIcon">
+                                <i class="fas fa-folder"></i>
+                            </div>
+                            <div class="icon-options">
+                                <div class="icon-option" data-icon="fas fa-folder"><i class="fas fa-folder"></i></div>
+                                <div class="icon-option" data-icon="fas fa-calendar-alt"><i class="fas fa-calendar-alt"></i></div>
+                                <div class="icon-option" data-icon="fas fa-money-bill-wave"><i class="fas fa-money-bill-wave"></i></div>
+                                <div class="icon-option" data-icon="fas fa-user-edit"><i class="fas fa-user-edit"></i></div>
+                                <div class="icon-option" data-icon="fas fa-shield-alt"><i class="fas fa-shield-alt"></i></div>
+                            </div>
+                            <input type="hidden" id="quickCategoryIcon" value="fas fa-folder" required />
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelQuickCategoryBtn">ยกเลิก</button>
+                <button class="btn btn-primary" id="saveQuickCategoryBtn">บันทึกหมวดหมู่</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="toast" id="toast">
+        <div class="toast-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="toast-content">
+            <div class="toast-message">บันทึกข้อมูลเรียบร้อยแล้ว</div>
+        </div>
+        <div class="toast-close">
+            <i class="fas fa-times"></i>
+        </div>
+    </div>
+    
+    <!-- JavaScript -->
+    <script src="js/config.js"></script>
+    <script src="js/demo-data.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/admin/admin-ui.js"></script>
+    <script src="js/admin/questions-manager.js"></script>
+    <script src="js/admin/categories-manager.js"></script>
+    <script src="js/admin/import-export.js"></script>
+    <script src="js/admin/admin-main.js"></script>
+</body>
+</html>
